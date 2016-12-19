@@ -6,6 +6,7 @@ import os
 import psycopg2
 import urllib.parse
 import uuid
+import json
 
 app = Flask(__name__)
 
@@ -13,61 +14,40 @@ app = Flask(__name__)
 app.config['CORS_HEADERS'] = 'Content-Type'
 CORS(app)
 
-# # Database
-# # would have to split this into two git repos to get it to work with heroku (Procfile, requirements.txt, runtime.txt need to be in root folder)
-# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
-# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# Database
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# db = SQLAlchemy(app)
-# from models import Todo
-
-todos = [{
-    'id': uuid.uuid4(),
-    'text': 'testing 123 can you see me?',
-    'completed': False,
-    'order': 0
-}]
+db = SQLAlchemy(app)
+from models import Todo
 
 @app.route('/todos', methods=['GET', 'POST'])
 @cross_origin()
 def index():
     if request.method == 'POST':
-        # order = len(Todo.query.all())
-        # print(order)
-        # todo = Todo(order, request.form['text'])
-        # print(todo)
-        # db.session.add(todo)
-        # db.session.commit()
-        print('adding the todo: ')
-        todo = {
-            'id': uuid.uuid4(),
-            'text': request.form['text'],
-            'completed': False,
-            'order': len(todos)
-        }
-        print(todo)
-        todos.append(todo)
-        print(todos)
-        return jsonify(**todo)
+        order = len(Todo.query.all())
+        todo = Todo(order, request.form['text'])
+        db.session.add(todo)
+        db.session.commit()
+        return jsonify(todo)
     else:
-        # todos = Todo.query.all()
-        print('getting all todos: ')
-        print(todos)
+        # not working, objects not jsonify'able...
+        todos = Todo.query.all()
         return jsonify({ 'todos': todos })
 
-# @app.route('/todos/<int:todo_id>')
+# @app.route('/todos/<todo_id>')
 # def show_todo():
 #     return "placeholder"
 
-# @app.route('/todos/<int:todo_id>/edit', methods=['PUT'])
+# @app.route('/todos/<todo_id>/edit', methods=['PUT'])
 # def edit_todo():
 #     return "placeholder"
 
-# @app.route('/todos/<int:todo_id>/toggle', methods=['PUT'])
+# @app.route('/todos/<todo_id>/toggle', methods=['PUT'])
 # def finish_todo():
 #     return "placeholder"
 
-# @app.route('/todos/<int:todo_id>/delete', methods=['DELETE'])
+# @app.route('/todos/<todo_id>/delete', methods=['DELETE'])
 # def delete_todo():
 #     return "placeholder"
 

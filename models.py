@@ -14,4 +14,9 @@ class Todo(db.Model):
         self.completed = False
 
     def __repr__(self):
-        return '<{}>'.format(self.text)
+        return '{}'.format({ 
+            'id': self.id, 
+            'order': self.order, 
+            'text': self.text,
+            'completed': self.completed
+        })
